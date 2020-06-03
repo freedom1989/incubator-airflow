@@ -277,6 +277,15 @@ def create_app(config=None, session=None, testing=False, app_name="Airflow"):
         def make_session_permanent():
             flask_session.permanent = True
 
+        # This fix: TypeError: Unexpected value for identifier: b'en'
+        # I don't know why the locale in the session is type of bytes.
+        # TODO(lintaoli): Find the reason and remove this method.
+        @app.before_request
+        def fix_locale():
+            locale = flask_session['locale']
+            if locale and isinstance(locale, bytes):
+                flask_session['locale'] = 'en'
+
     return app, appbuilder
 
 
